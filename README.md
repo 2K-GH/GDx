@@ -1,20 +1,20 @@
 # GDx (Ground Drone Experimental)
 
-**GDx** is a dual-MCU robotics platform designed for localized surveillance and remote exploration. It features a high-bandwidth MJPEG video stream using the **OV3660** sensor and a custom 2-DOF Pan-Tilt camera system[cite: 3, 4].
+**GDx** is a dual-MCU robotics platform designed for localized surveillance and remote exploration. It features a high-bandwidth MJPEG video stream using the **OV3660** sensor and a custom 2-DOF Pan-Tilt camera system.
 
 ---
 
 ## 📸 Project Gallery
 
 ### Hardware Overview
-The drone utilizes a 4WD aluminum chassis powered by dual 18650 Li-ion batteries. The "Brain" consists of an **Arduino Uno** for locomotion and an **ESP32-CAM** for high-level networking and vision[cite: 3, 4].
+The drone utilizes a 4WD aluminum chassis designed for versatile power delivery. The "Brain" consists of an **Arduino Uno** for locomotion and an **ESP32-CAM** for high-level networking and vision.
 
 ![Ground Drone Hardware](assets/GDx_Photo.png)
 
 ---
 
 ### Control Interface
-The GDx is operated via a custom mobile-responsive web application. The interface provides real-time movement controls, granular camera gimbal adjustment, and a dedicated toggle for the onboard flash LED[cite: 3, 4].
+The GDx is operated via a custom mobile-responsive web application. The interface provides real-time movement controls, granular camera gimbal adjustment, and a dedicated toggle for the onboard flash LED.
 
 | **Normal View** | **Flash Active** |
 | :---: | :---: |
@@ -24,37 +24,34 @@ The GDx is operated via a custom mobile-responsive web application. The interfac
 ---
 
 ## ⚙️ Hardware Specifications
-*   **Camera Module**: **OmniVision OV3660** (3MP).
-    *   *Firmware is specifically optimized for OV3660 registers to ensure stable MJPEG streaming.*
-*   **Microcontrollers**: ESP32-S (AI-Thinker) & Arduino Uno Rev3[cite: 3, 4].
-*   **Antenna System**: Default PCB antenna (bridgeable for external 2.4GHz pigtail support).
-*   **Actuators**: 4x DC Motors (L298N Driver) + 2x SG90 Micro Servos.
+* **Camera Module**: **OmniVision OV3660** (3MP).
+    * *Firmware is specifically optimized for OV3660 registers to ensure stable MJPEG streaming.*
+* **Microcontrollers**: 
+    * **ESP32-CAM**: Handles the WebSocket server, MJPEG streaming, and WiFi AP logic.
+    * **Arduino Uno**: Manages the L298N motor driver and SG90 servo PWM signals.
+* **Power Delivery**: **7.4V Battery**.
+    * **Supported Chemistries**: The system is compatible with both **Li-Ion** and **LiPo** power sources.
+    * *A stable 7.4V nominal output is required to ensure motor torque and MCU logic stability.*
 
 ---
 
-## 🚀 Quick Start & Usage
+## 📡 Networking & Dashboard Access
 
-### 1. Networking
-*   **SSID**: `SSID` | **Password**: `password`[cite: 4].
-*   **Access Point**: Connect your device to the drone's WiFi and navigate to `192.168.4.1` in your browser[cite: 4].
-*   **Credentials**: These can be modified within the `ESP32-CAM_Final.ino` source code[cite: 4].
+To access the GDx dashboard, you must manually connect to the drone's localized network. For security and to reduce spectral noise, the **Access Point (AP) is hidden**.
 
-### 2. Controls
-*   **Movement**: Use **F** (Forward), **B** (Backward), **L** (Left), and **R** (Right) buttons[cite: 3, 4].
-*   **Gimbal**: Use **PAN** and **TILT** sliders for horizontal and vertical rotation[cite: 3, 4].
-*   **Flash**: Toggle the **FLASH** button to enable the onboard high-brightness LED[cite: 4].
-
-### 3. Startup Behavior
-*   **Auto-Leveling**: Upon startup, the camera gimbal is programmed to face forward and center itself ($P: 75, T: 135$).
-*   **Idle State**: If the signal is lost for 10 seconds, the fail-safe routine triggers, returning the camera to the front-facing position and stopping all motor activity[cite: 3].
+1.  **Search for Hidden Network**: Open your device's WiFi settings and select "Add Network" or "Other".
+2.  **Input SSID**: Manually type the SSID defined in the `ESP32-CAM_Control.ino` code.
+3.  **Input Password**: Enter the WPA2 passphrase.
+4.  **Set Hidden Status**: You must toggle the **"Hidden Network"** option to **Yes** in your device settings to successfully authenticate.
+5.  **Access URL**: Once connected, navigate to the ESP32-CAM's gateway IP (default `192.168.4.1`) in your browser.
 
 ---
 
 ## 🛠 Deployment Notes
 
-*   **Programming Protocol**: When uploading code to the Arduino, disconnect the ESP32-CAM to avoid Serial bus conflicts. If the connection is permanent (soldered), hold the **Reset** button on the ESP32-CAM during the Arduino upload to put it in a cutoff state[cite: 3].
-*   **RF Environment**: Outdoor operation is recommended to maximize range. Nearby metals and 2.4GHz devices (like routers) can cause Electromagnetic Interference (EMI) that degrades the video feed[cite: 4].
-*   **Range Extension**: The ESP32-CAM range can be extended by attaching an external antenna. This requires a hardware modification: moving the 0-ohm resistor (acting as a switch) to the external antenna pads.
+* **Programming Protocol**: When uploading code to the Arduino, disconnect the ESP32-CAM to avoid Serial bus conflicts. If the connection is permanent, hold the **Reset** button on the ESP32-CAM during the Arduino upload to put it in a cutoff state.
+* **RF Environment**: Outdoor operation is recommended to maximize range. Nearby 2.4GHz devices can cause interference that degrades the MJPEG video feed.
+* **Range Extension**: The ESP32-CAM range can be extended by attaching an external antenna. This requires moving the 0-ohm resistor on the board to the external antenna pads.
 
 ---
 
@@ -62,12 +59,12 @@ The GDx is operated via a custom mobile-responsive web application. The interfac
 
 | Issue | Solution |
 | :--- | :--- |
-| **Cannot connect to AP** | Press the **Reset** button on the ESP32-CAM[cite: 4]. |
-| **No SSID visible** | Battery is likely low. The ESP32-CAM is power-hungry due to constant WiFi, live video, and flash usage[cite: 4]. |
-| **Video feed lost** | Refresh the web page. If the issue persists, reset the ESP32-CAM. Ensure no physical obstructions are blocking the link[cite: 4]. |
-| **Continuous Spinning** | If GDx spins after an ESP32-CAM reset, press the **Arduino Reset** button to clear the motor buffer[cite: 3]. |
+| **Cannot connect to AP** | Ensure you have enabled "Connect to hidden network" and press the **Reset** button on the ESP32-CAM. |
+| **No SSID visible** | This is intended as the network is hidden. Manually add the credentials. If it still fails, check the battery voltage. |
+| **Video feed lost** | Refresh the web page. If the issue persists, reset the ESP32-CAM. Ensure no physical obstructions are blocking the link. |
+| **Continuous Spinning** | If the drone spins after an ESP32-CAM reset, press the **Arduino Reset** button to clear the motor buffer. |
 
 ---
 
-## ⚖ License
-Distributed under the **MIT License**. See `LICENSE` for more information.
+## **License**
+This project is released under the **MIT License**.
