@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <esp_wifi.h>
 
 // --- AI-THINKER PINOUT (OV3660) ---
 #define PWDN_GPIO_NUM     32
@@ -40,7 +41,6 @@ const char* htmlHomePage PROGMEM = R"HTML(
   .btn { background: #222; color: #fff; padding: 25px 0; border: 1px solid #444; border-radius: 8px; font-size: 18px; font-weight: bold; touch-action: manipulation; }
   .btn:active { background: #4CAF50; }
   .flash-btn { background: #444; color: #ffeb3b; border-color: #ffeb3b; transition: 0.3s; }
-  /* This class makes the button stay green when the flash is ON */
   .flash-on { background: #4CAF50 !important; color: #fff !important; border-color: #fff !important; }
   .slider-box { width: 90%; margin: 15px auto; }
   input[type=range] { width: 100%; height: 20px; appearance: none; background: #333; outline: none; border-radius: 10px; }
@@ -87,7 +87,6 @@ const char* htmlHomePage PROGMEM = R"HTML(
     function s(m){ 
       if(ctrl.readyState === WebSocket.OPEN) {
         ctrl.send(m);
-        // Toggles the green background on the button when 'X' is sent
         if(m === 'X') {
           document.getElementById('fBtn').classList.toggle('flash-on');
         }
@@ -127,7 +126,12 @@ void setup() {
 
   WiFi.mode(WIFI_AP);
   delay(100);
-  WiFi.softAP(ssid, password);
+  
+  // Set to Channel 9, Hidden = 1, Max Connections = 1
+  WiFi.softAP(ssid, password, 9, 1, 1);
+  
+  // Force 20MHz bandwidth to avoid overlapping with jammer targets
+  esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_BW_HT20);
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
